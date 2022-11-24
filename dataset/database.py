@@ -300,7 +300,7 @@ def parse_database_name(database_name:str)->BaseDatabase:
     else:
         raise NotImplementedError
 
-def get_database_split(database, split_name):
+def get_database_split(database, split_name, predicting=False):
     if split_name.startswith('linemod'): # linemod_test or linemod_val
         assert(database.database_name.startswith('linemod'))
         model_name = database.database_name.split('/')[1]
@@ -311,9 +311,13 @@ def get_database_split(database, split_name):
         lines = np.loadtxt(f"{LINEMOD_ROOT}/{model_name}/train.txt", dtype=np.str).tolist()
         for line in lines: ref_ids.append(str(int(line.split('/')[-1].split('.')[0])))
     elif split_name=='all':
-        ref_ids = que_ids = database.get_img_ids()
+        if not predicting:
+            ref_ids = que_ids = database.get_img_ids()
+        else:
+            ref_ids = que_ids = list(database.poses.keys())
     else:
         raise NotImplementedError
+
     return ref_ids, que_ids
 
 def get_ref_point_cloud(database):

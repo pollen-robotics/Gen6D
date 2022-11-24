@@ -110,7 +110,6 @@ class BaseDetector(nn.Module):
 
         _, score_x, score_y = BaseDetector.get_select_index(scores) # qn
         positions = torch.stack([score_x, score_y], -1)  # qn,2
-
         offset = offsets[torch.arange(qn),:,score_y,score_x] # qn,2
         positions = positions + offset
 
@@ -303,4 +302,5 @@ class Detector(BaseDetector):
             outputs['select_pr_offset'].detach(), self.pool_ratio)
         detection_results = {'positions': positions, 'scales': scales}
         detection_results = to_cpu_numpy(detection_results)
+
         return detection_results

@@ -15,10 +15,6 @@ from realsense_wrapper import RealsenseWrapper
 parser = argparse.ArgumentParser()
 parser.add_argument('--cfg', type=str, default='configs/gen6d_pretrain.yaml')
 parser.add_argument('--database', type=str, default="custom/mouse")
-# parser.add_argument('--output', type=str, default="data/custom/mouse/test")
-
-# input video process
-# parser.add_argument('--video', type=str, default="data/custom/video/mouse-test.mp4")
 parser.add_argument('--resolution', type=int, default=960)
 parser.add_argument('--transpose', action='store_true', dest='transpose', default=False)
 
@@ -65,22 +61,30 @@ def get_pose_img(im, pose_init, hist_pts):
     pts__, _ = project_points(object_bbox_3d, pose_, K)
     bbox_img_ = draw_bbox_3d(im, pts__, (0,0,255))
 
-    return bbox_img_
+    # print(pose_)
+
+    return bbox_img_, pose_init, inter_results
 
 pose_init = None
 hist_pts = []
+i = 0
 while True:
-    
-    # get and resize image
+    # When pose_init is none, the 4 steps are computed (detection, selection, pose, refine)
+    # when it is not, juste the refine step is computed, initialized with the previous pose_init
+    if i%20==0:
+        pose_init = None
+
     im = rw.get_color_frame()
-    cv2.imshow("raw im", im)
-    # h, w = im.shape[:2]
-    # ratio = args.resolution/max(h,w)
-    # ht, wt = int(ratio*h), int(ratio*w)
-    # im = cv2.resize(im, (ht,wt), interpolation=cv2.INTER_LINEAR)
-    pose_im = get_pose_img(im, pose_init, hist_pts)
+
+    pose_im, pose_init, inter_results = get_pose_img(im, pose_init, hist_pts)
+    if "sel_scores" in inter_results:
+        print("sel_scores : ", inter_results["sel_scores"][inter_results["sel_ref_idx"]])
+        # cv2.imshow("det", inter_results["det_que_img"])
+
     cv2.imshow("pose", pose_im)
     cv2.waitKey(1)
+
+    i += 1
 
 
 
