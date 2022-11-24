@@ -6,7 +6,9 @@ import torch.nn.functional as F
 
 from network.attention import AttentionBlock
 from network.pretrain_models import VGGBNPretrain
-from utils.base_utils import color_map_forward
+import sys
+sys.path.insert(0, "./utils/")
+from base_utils import color_map_forward
 
 
 class ViewpointSelector(nn.Module):

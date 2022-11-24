@@ -5,10 +5,12 @@ import torch
 from dataset.database import BaseDatabase, get_database_split, get_object_vert, get_object_center
 
 from network import name2network
-from utils.base_utils import load_cfg, transformation_offset_2d, transformation_scale_2d, \
+import sys
+sys.path.insert(0, "./utils/")
+from base_utils import load_cfg, transformation_offset_2d, transformation_scale_2d, \
     transformation_compose_2d, transformation_crop, transformation_rotation_2d
-from utils.database_utils import select_reference_img_ids_fps, normalize_reference_views
-from utils.pose_utils import estimate_pose_from_similarity_transform_compose
+from database_utils import select_reference_img_ids_fps, normalize_reference_views
+from pose_utils import estimate_pose_from_similarity_transform_compose
 
 
 def compute_similarity_transform(pts0, pts1):
@@ -141,6 +143,11 @@ class Gen6DEstimator:
         object_vert = get_object_vert(database)
         ref_ids_all, _ = get_database_split(database, split_type)
 
+        ref_ids_all = ['0', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '73', '74', '76', '77', '78', '79', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '96', '97', '98', '99', '100', '101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116', '117', '118', '119', '120', '121', '122', '123', '124', '125', '126', '127', '128', '129', '130', '131', '132', '133', '134', '135', '136', '137', '138', '139', '140', '141', '142', '143', '144', '145', '146', '147', '148', '149', '150', '151', '153', '154', '155', '156', '157', '158', '159', '160', '162', '163', '164', '165', '166', '167', '168', '169', '170', '171', '172', '173', '174', '175', '177', '178', '179', '180', '181', '182', '183', '185', '186', '187', '188', '189', '190', '191', '192', '193', '194', '195', '196', '197']
+        # ref_ids_all = np.random.choice(ref_ids_all, 10)
+        ref_ids_all = np.random.choice(ref_ids_all, 40)
+        print(ref_ids_all)
+        # print(ref_ids_all)
         # use fps to select reference images for detection and selection
         ref_ids = select_reference_img_ids_fps(database, ref_ids_all, self.cfg['ref_view_num'])
         ref_imgs, ref_masks, ref_Ks, ref_poses, ref_Hs = \

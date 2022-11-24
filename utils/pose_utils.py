@@ -4,7 +4,7 @@ from transforms3d.axangles import mat2axangle
 from transforms3d.euler import mat2euler
 from transforms3d.quaternions import quat2mat
 
-from utils.base_utils import transformation_inverse_2d, project_points, transformation_apply_2d, hpts_to_pts, \
+from base_utils import transformation_inverse_2d, project_points, transformation_apply_2d, hpts_to_pts, \
     pts_to_hpts, transformation_decompose_2d, angle_to_rotation_2d, look_at_rotation, transformation_offset_2d, \
     transformation_compose_2d, transformation_scale_2d, transformation_rotation_2d, pose_inverse, transform_points_pose, pose_apply
 
