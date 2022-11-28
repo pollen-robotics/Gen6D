@@ -181,6 +181,7 @@ class Gen6DEstimator:
             # stage 1: detection
             with torch.no_grad():
                 detection_outputs = self.detector.detect_que_imgs(que_img[None])
+
                 position = detection_outputs['positions'][0]
 
                 scale_r2q = detection_outputs['scales'][0]

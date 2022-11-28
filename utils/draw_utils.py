@@ -276,6 +276,8 @@ def draw_bbox_3d(img,pts2d,color=(0,255,0)):
     red_colors[:,0]=255
     img = draw_keypoints(img, pts2d, colors=red_colors)
 
+    front_color = (255, 0, 0)
+
     pts2d = np.round(pts2d).astype(np.int32)
     img = cv2.line(img,tuple(pts2d[0]),tuple(pts2d[1]),color,2)
     img = cv2.line(img,tuple(pts2d[1]),tuple(pts2d[2]),color,2)
@@ -287,7 +289,7 @@ def draw_bbox_3d(img,pts2d,color=(0,255,0)):
     img = cv2.line(img,tuple(pts2d[6]),tuple(pts2d[7]),color,2)
     img = cv2.line(img,tuple(pts2d[7]),tuple(pts2d[4]),color,2)
 
-    img = cv2.line(img,tuple(pts2d[0]),tuple(pts2d[4]),color,2)
+    img = cv2.line(img,tuple(pts2d[0]),tuple(pts2d[4]),front_color,2)
     img = cv2.line(img,tuple(pts2d[1]),tuple(pts2d[5]),color,2)
     img = cv2.line(img,tuple(pts2d[2]),tuple(pts2d[6]),color,2)
     img = cv2.line(img,tuple(pts2d[3]),tuple(pts2d[7]),color,2)

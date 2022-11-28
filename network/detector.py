@@ -107,7 +107,7 @@ class BaseDetector(nn.Module):
         @return: position in x_cur
         """
         qn, _, _, _ = offsets.shape
-
+        
         _, score_x, score_y = BaseDetector.get_select_index(scores) # qn
         positions = torch.stack([score_x, score_y], -1)  # qn,2
         offset = offsets[torch.arange(qn),:,score_y,score_x] # qn,2

@@ -43,6 +43,16 @@ estimator.build(ref_database, split_type='all')
 object_pts = get_ref_point_cloud(ref_database)
 object_bbox_3d = pts_range_to_bbox_pts(np.max(object_pts,0), np.min(object_pts,0))
 
+
+# bbox_length = np.linalg.norm(object_bbox_3d[5] - object_bbox_3d[6]) # pince
+bbox_length = np.linalg.norm(object_bbox_3d[0] - object_bbox_3d[4]) # cylindre
+# actual_object_length_meters = 0.093 # pince
+actual_object_length_meters = 0.108 # cylindre
+factor = actual_object_length_meters/bbox_length
+
+
+print(factor)
+
 def get_pose_img(im, pose_init, hist_pts):
     h, w = im.shape[:2]
     f=np.sqrt(h**2+w**2)
@@ -53,7 +63,7 @@ def get_pose_img(im, pose_init, hist_pts):
     pose_init = pose_pr
 
     pts, _ = project_points(object_bbox_3d, pose_pr, K)
-    bbox_img = draw_bbox_3d(im, pts, (0,0,255))
+    # bbox_img = draw_bbox_3d(im, pts, (0,0,255))
 
     hist_pts.append(pts)
     pts_ = weighted_pts(hist_pts, weight_num=args.num, std_inv=args.std)
@@ -61,7 +71,12 @@ def get_pose_img(im, pose_init, hist_pts):
     pts__, _ = project_points(object_bbox_3d, pose_, K)
     bbox_img_ = draw_bbox_3d(im, pts__, (0,0,255))
 
-    # print(pose_)
+
+    pose_meters = pose_.copy()
+    pose_meters[:3, 3] *= factor
+    print(pose_)
+    print(pose_meters)
+    print("====")
 
     return bbox_img_, pose_init, inter_results
 
@@ -77,9 +92,6 @@ while True:
     im = rw.get_color_frame()
 
     pose_im, pose_init, inter_results = get_pose_img(im, pose_init, hist_pts)
-    if "sel_scores" in inter_results:
-        print("sel_scores : ", inter_results["sel_scores"][inter_results["sel_ref_idx"]])
-        # cv2.imshow("det", inter_results["det_que_img"])
 
     cv2.imshow("pose", pose_im)
     cv2.waitKey(1)
