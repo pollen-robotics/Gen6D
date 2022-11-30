@@ -1,9 +1,7 @@
 import argparse
 import numpy as np
-from tqdm import tqdm
 from dataset.database import parse_database_name, get_ref_point_cloud
 from estimator import name2estimator
-from eval import visualize_intermediate_results
 import sys
 sys.path.insert(0, "./utils/")
 from base_utils import load_cfg, project_points
@@ -43,12 +41,11 @@ estimator.build(ref_database, split_type='all')
 object_pts = get_ref_point_cloud(ref_database)
 object_bbox_3d = pts_range_to_bbox_pts(np.max(object_pts,0), np.min(object_pts,0))
 
-
 # bbox_length = np.linalg.norm(object_bbox_3d[5] - object_bbox_3d[6]) # pince
 bbox_length = np.linalg.norm(object_bbox_3d[0] - object_bbox_3d[4]) # cylindre
-# actual_object_length_meters = 0.093 # pince
-actual_object_length_meters = 0.108 # cylindre
-factor = actual_object_length_meters/bbox_length
+
+# factor = ref_database.size_meters[0]/np.linalg.norm(ref_database.x)
+factor = ref_database.size_meters[0]/bbox_length
 
 
 print(factor)
@@ -72,11 +69,11 @@ def get_pose_img(im, pose_init, hist_pts):
     bbox_img_ = draw_bbox_3d(im, pts__, (0,0,255))
 
 
-    # pose_meters = pose_.copy()
-    # pose_meters[:3, 3] *= factor
+    pose_meters = pose_.copy()
+    pose_meters[:3, 3] *= factor
     # print(pose_)
-    # print(pose_meters)
-    # print("====")
+    print(pose_meters)
+    print("====")
 
     return bbox_img_, pose_init, inter_results
 

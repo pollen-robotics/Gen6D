@@ -249,11 +249,18 @@ class CustomDatabase(BaseDatabase):
         if len(self.poses.keys())>0:
             # read meta information to scale and rotate
             directions = np.loadtxt(str(self.root/'meta_info.txt'))
-            x = directions[0]
-            z = directions[1]
+            self.x = directions[0]
+            self.z = directions[1]
+            if len(directions) > 2:
+                self.size_meters = directions[2]
+            else:
+                self.size_meters = None
+
+            # length = directions[2]
+            # print(length)
             self.object_point_cloud = load_point_cloud(f'{self.root}/object_point_cloud.ply')
             # rotate
-            self.rotation = GenMOPMetaInfoWrapper.compute_rotation(z, x)
+            self.rotation = GenMOPMetaInfoWrapper.compute_rotation(self.z, self.x)
             self.object_point_cloud = (self.object_point_cloud @ self.rotation.T)
 
             # scale
