@@ -72,11 +72,11 @@ def get_pose_img(im, pose_init, hist_pts):
     bbox_img_ = draw_bbox_3d(im, pts__, (0,0,255))
 
 
-    pose_meters = pose_.copy()
-    pose_meters[:3, 3] *= factor
-    print(pose_)
-    print(pose_meters)
-    print("====")
+    # pose_meters = pose_.copy()
+    # pose_meters[:3, 3] *= factor
+    # print(pose_)
+    # print(pose_meters)
+    # print("====")
 
     return bbox_img_, pose_init, inter_results
 
