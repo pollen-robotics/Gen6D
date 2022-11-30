@@ -253,15 +253,29 @@ def resize_small_image(img,resize_min):
         return img, 1.0
     
 ############################geometry######################################
-def project_points(pts,RT,K):
-    pts = np.matmul(pts,RT[:,:3].transpose())+RT[:,3:].transpose()
-    pts = np.matmul(pts,K.transpose())
-    dpt = pts[:,2]
-    mask0 = (np.abs(dpt)<1e-4) & (np.abs(dpt)>0)
-    if np.sum(mask0)>0: dpt[mask0]=1e-4
-    mask1=(np.abs(dpt) > -1e-4) & (np.abs(dpt) < 0)
-    if np.sum(mask1)>0: dpt[mask1]=-1e-4
-    pts2d = pts[:,:2]/dpt[:,None]
+def project_points(pts, RT, K):
+
+    RT = RT[:3, :]
+    
+    pts = pts @ RT[:3, :3].T + RT[:, 3]
+    pts = pts @ K.T
+
+    # pts = np.matmul(pts, RT[:,:3].transpose()) + RT[:, 3:].transpose()
+    # pts = np.matmul(pts, K.transpose())
+    dpt = pts[:, 2]
+
+    mask0 = (np.abs(dpt) < 1e-4) & (np.abs(dpt) > 0)
+
+    if np.sum(mask0) > 0: 
+        dpt[mask0] = 1e-4
+
+    mask1 = (np.abs(dpt) > -1e-4) & (np.abs(dpt) < 0)
+
+    if np.sum(mask1) > 0: 
+        dpt[mask1] = -1e-4
+
+    pts2d = pts[:, :2] / dpt[:, None]
+
     return pts2d, dpt
 
 def round_coordinates(coord,h,w):

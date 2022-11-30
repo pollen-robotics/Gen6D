@@ -2,19 +2,24 @@ import argparse
 import numpy as np
 from dataset.database import parse_database_name, get_ref_point_cloud
 from estimator import name2estimator
-import sys
 from utils.base_utils import load_cfg, project_points
 from utils.draw_utils import pts_range_to_bbox_pts, draw_bbox_3d
 from utils.pose_utils import pnp
 from utils.realsense_wrapper import RealsenseWrapper
+from utils.aruco_utils import ArucoUtils
+from cv2 import aruco
 import cv2
+from FramesViewer import FramesViewer
+import time
+
+fv = FramesViewer()
+fv.start()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cfg', type=str, default='configs/gen6d_pretrain.yaml')
 parser.add_argument('--database', type=str, default="custom/mouse")
 parser.add_argument('--resolution', type=int, default=960)
 parser.add_argument('--transpose', action='store_true', dest='transpose', default=False)
-
 # smooth poses
 parser.add_argument('--num', type=int, default=5)
 parser.add_argument('--std', type=float, default=2.5)
@@ -39,47 +44,60 @@ estimator.build(ref_database, split_type='all')
 
 object_pts = get_ref_point_cloud(ref_database)
 object_bbox_3d = pts_range_to_bbox_pts(np.max(object_pts,0), np.min(object_pts,0))
+bbox_center = np.mean(object_bbox_3d, axis=0)
 
+# Y'a un truc chelou avec la bbox
+#   elle a une position un peu random (surement les coordonnées dans le point cloud que j'ai détouré)
+#   quand l'affiche avec project_points() et draw_bbox_3d() ça marche nickel
+#   par contre la pose calculée par get_pose a un offset en translation (qui semble être l'offset du centre de la BB par rapport à l'origine)
+# Si je fais :
+#   object_bbox_3d -= bbox_center
+# Alors la BB a le même offset que la box, et la frame projetée dans l'image est nickel au centre de la BB
+# Par contre, je peux pas juste translater à posteriori la frame de la valeur du centre de la BB, il doit y avoir un rescaling quelque part
+# 
+# Dans project_points() y'a ça qui est fait
+#   Pourquoi ce RT[:, 3] en plus ? c'est surement la qu'on bouge les points de la BB pour qu'ils s'alignent avec l'objet mais je comprend pas bien
+#       pts = pts @ RT[:3, :3].T + RT[:, 3]
+#       pts = pts @ K.T
+
+
+# bbox_length = np.linalg.norm(object_bbox_3d[0] - object_bbox_3d[4]) # cylindre
 # bbox_length = np.linalg.norm(object_bbox_3d[5] - object_bbox_3d[6]) # pince
-bbox_length = np.linalg.norm(object_bbox_3d[0] - object_bbox_3d[4]) # cylindre
+# factor = ref_database.size_meters[0]/bbox_length
 
-# factor = ref_database.size_meters[0]/np.linalg.norm(ref_database.x)
-factor = ref_database.size_meters[0]/bbox_length
+factor = ref_database.size_meters[0]/np.linalg.norm(ref_database.x) # ça a l'air de marcher, attendre de bien mesurer avant de virer le truc avec la taille de la BB
 
+arucoUtils = ArucoUtils(8, 5, 0.03, 0.015, aruco.DICT_4X4_50, (0.15, 0.24), "configs/calibration.pckl")
 
-print(factor)
+h, w = (480, 640)
+f    = np.sqrt(h**2 + w**2)
+K    = np.asarray([[f, 0, w/2], [0 ,f ,h/2], [0 ,0 ,1]], np.float32)
 
-def get_pose_img(im, pose_init, hist_pts):
-    h, w = im.shape[:2]
-    f=np.sqrt(h**2+w**2)
-    K = np.asarray([[f,0,w/2],[0,f,h/2],[0,0,1]],np.float32)
+def get_pose(im, pose_init):
+
     if pose_init is not None:
         estimator.cfg['refine_iter'] = 1 # we only refine one time after initialization
-    pose_pr, inter_results = estimator.predict(im, K, pose_init=pose_init)
-    pose_init = pose_pr
 
-    pts, _ = project_points(object_bbox_3d, pose_pr, K)
-    # bbox_img = draw_bbox_3d(im, pts, (0,0,255))
+    # TODO should work better but does not -> investigate
+    # pose_pr, _             = estimator.predict(im, arucoUtils.getCameraMatrix(), pose_init=pose_init)
+    pose_pr, _             = estimator.predict(im, K, pose_init=pose_init)
 
-    hist_pts.append(pts)
-    pts_ = weighted_pts(hist_pts, weight_num=args.num, std_inv=args.std)
-    pose_ = pnp(object_bbox_3d, pts_, K)
-    pts__, _ = project_points(object_bbox_3d, pose_, K)
-    bbox_img_ = draw_bbox_3d(im, pts__, (0,0,255))
+    pose                   = np.vstack((pose_pr, [0, 0, 0, 1]))
 
+    return pose
 
-    pose_meters = pose_.copy()
-    pose_meters[:3, 3] *= factor
-    # print(pose_)
-    print(pose_meters)
-    print("====")
+def get_bbox_img(im, pose):
+    pts, _   = project_points(object_bbox_3d, pose, K)
+    bbox_img = draw_bbox_3d(im, pts, (0,0,255))
 
-    return bbox_img_, pose_init, inter_results
+    return bbox_img
+
 
 pose_init = None
 hist_pts = []
 i = 0
 while True:
+
     # When pose_init is none, the 4 steps are computed (detection, selection, pose, refine)
     # when it is not, juste the refine step is computed, initialized with the previous pose_init
     if i%20==0:
@@ -87,12 +105,29 @@ while True:
 
     im = rw.get_color_frame()
 
-    pose_im, pose_init, inter_results = get_pose_img(im, pose_init, hist_pts)
+    T_camera_object = get_pose(im, pose_init)
+    pose_im         = get_bbox_img(im, T_camera_object.copy())
+    pose_init       = T_camera_object.copy()
+
+    T_world_camera = arucoUtils.get_camera_pose(im)
+
+    if T_world_camera is not None:
+        fv.pushFrame(T_world_camera, "T_world_camera")
+        tmp = T_camera_object.copy()
+        tmp[:3, 3] *= factor
+        T_world_object         = T_world_camera @ tmp
+        # T_world_object[:3, 3] *= factor # -> meters
+
+        fv.pushFrame(T_world_object, "T_world_object")
+
+    pose_im = arucoUtils.drawFrame(pose_im, T_camera_object)
 
     cv2.imshow("pose", pose_im)
     cv2.waitKey(1)
 
     i += 1
+
+    time.sleep(0.01)
 
 
 
