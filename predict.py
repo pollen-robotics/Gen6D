@@ -11,10 +11,9 @@ from estimator import name2estimator
 from eval import visualize_intermediate_results
 from prepare import video2image
 import sys
-sys.path.insert(0, "./utils/")
-from base_utils import load_cfg, project_points
-from draw_utils import pts_range_to_bbox_pts, draw_bbox_3d
-from pose_utils import pnp
+from utils.base_utils import load_cfg, project_points
+from utils.draw_utils import pts_range_to_bbox_pts, draw_bbox_3d
+from utils.pose_utils import pnp
 
 
 def weighted_pts(pts_list, weight_num=10, std_inv=10):

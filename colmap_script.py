@@ -8,9 +8,8 @@ from skimage.io import imsave
 
 from dataset.database import BaseDatabase, get_database_split
 import sys
-sys.path.insert(0, "./utils/")
-from colmap_database import COLMAPDatabase
-from read_write_model import CAMERA_MODEL_NAMES
+from utils.colmap_database import COLMAPDatabase
+from utils.read_write_model import CAMERA_MODEL_NAMES
 
 def run_sfm(colmap_path, model_path, database_path, image_dir):
     logging.info('Running the triangulation...')

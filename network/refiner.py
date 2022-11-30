@@ -8,11 +8,11 @@ from dataset.database import NormalizedDatabase, normalize_pose, get_object_cent
 from network.operator import pose_apply_th, normalize_coords
 from network.pretrain_models import VGGBNPretrainV3
 import sys
-sys.path.insert(0, "./utils/")
-from base_utils import pose_inverse, project_points, color_map_forward, to_cuda, pose_compose
-from database_utils import look_at_crop, select_reference_img_ids_refinement, normalize_reference_views
-from pose_utils import let_me_look_at, compose_sim_pose, pose_sim_to_pose_rigid
-from imgs_info import imgs_info_to_torch
+
+from utils.base_utils import pose_inverse, project_points, color_map_forward, to_cuda, pose_compose
+from utils.database_utils import look_at_crop, select_reference_img_ids_refinement, normalize_reference_views
+from utils.pose_utils import let_me_look_at, compose_sim_pose, pose_sim_to_pose_rigid
+from utils.imgs_info import imgs_info_to_torch
 
 
 class RefineFeatureNet(nn.Module):

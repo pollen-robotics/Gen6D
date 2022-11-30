@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from base_utils import color_map_forward
+from utils.base_utils import color_map_forward
 
 
 def imgs_info_to_torch(imgs_info):

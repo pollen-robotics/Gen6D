@@ -10,11 +10,10 @@ from tqdm import tqdm
 from dataset.database import parse_database_name, get_database_split, get_ref_point_cloud, get_diameter, get_object_center
 from estimator import name2estimator
 import sys
-sys.path.insert(0, "./utils/")
-from base_utils import load_cfg, save_pickle, read_pickle, project_points, transformation_crop
-from database_utils import compute_normalized_view_correlation
-from draw_utils import draw_bbox, concat_images_list, draw_bbox_3d, pts_range_to_bbox_pts
-from pose_utils import compute_metrics_impl, scale_rotation_difference_from_cameras
+from utils.base_utils import load_cfg, save_pickle, read_pickle, project_points, transformation_crop
+from utils.database_utils import compute_normalized_view_correlation
+from utils.draw_utils import draw_bbox, concat_images_list, draw_bbox_3d, pts_range_to_bbox_pts
+from utils.pose_utils import compute_metrics_impl, scale_rotation_difference_from_cameras
 
 
 def get_gt_info(que_pose, que_K, render_poses, render_Ks, object_center):

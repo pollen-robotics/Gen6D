@@ -6,11 +6,10 @@ from dataset.database import BaseDatabase, get_database_split, get_object_vert, 
 
 from network import name2network
 import sys
-sys.path.insert(0, "./utils/")
-from base_utils import load_cfg, transformation_offset_2d, transformation_scale_2d, \
+from utils.base_utils import load_cfg, transformation_offset_2d, transformation_scale_2d, \
     transformation_compose_2d, transformation_crop, transformation_rotation_2d
-from database_utils import select_reference_img_ids_fps, normalize_reference_views
-from pose_utils import estimate_pose_from_similarity_transform_compose
+from utils.database_utils import select_reference_img_ids_fps, normalize_reference_views
+from utils.pose_utils import estimate_pose_from_similarity_transform_compose
 
 
 def compute_similarity_transform(pts0, pts1):

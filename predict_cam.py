@@ -3,12 +3,11 @@ import numpy as np
 from dataset.database import parse_database_name, get_ref_point_cloud
 from estimator import name2estimator
 import sys
-sys.path.insert(0, "./utils/")
-from base_utils import load_cfg, project_points
-from draw_utils import pts_range_to_bbox_pts, draw_bbox_3d
-from pose_utils import pnp
+from utils.base_utils import load_cfg, project_points
+from utils.draw_utils import pts_range_to_bbox_pts, draw_bbox_3d
+from utils.pose_utils import pnp
+from utils.realsense_wrapper import RealsenseWrapper
 import cv2
-from realsense_wrapper import RealsenseWrapper
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cfg', type=str, default='configs/gen6d_pretrain.yaml')

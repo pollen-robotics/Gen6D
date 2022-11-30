@@ -6,9 +6,8 @@ import torchvision
 
 from network.pretrain_models import VGGBNPretrain
 import sys
-sys.path.insert(0, "./utils/")
-from base_utils import color_map_forward, transformation_crop, to_cpu_numpy
-from bbox_utils import parse_bbox_from_scale_offset
+from utils.base_utils import color_map_forward, transformation_crop, to_cpu_numpy
+from utils.bbox_utils import parse_bbox_from_scale_offset
 
 
 class BaseDetector(nn.Module):
