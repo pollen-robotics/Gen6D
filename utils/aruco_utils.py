@@ -53,7 +53,7 @@ class ArucoUtils:
 
         return None
 
-    def drawFrame(self, im, frame):
+    def drawFrame(self, im, frame, length=3):
         h, w = im.shape[:2]
         f    = np.sqrt(h**2 + w**2)
         K    = np.asarray([[f, 0, w/2], [0 ,f ,h/2], [0 ,0 ,1]], np.float32)
@@ -61,5 +61,41 @@ class ArucoUtils:
         tvec = frame[:3, 3]
         rvec, _ = cv2.Rodrigues(frame[:3, :3])
 
-        # return cv2.drawFrameAxes(im, self.__cameraMatrix, self.__distCoeffs, rvec, tvec, length=3)
-        return cv2.drawFrameAxes(im, K, np.array([0., 0., 0., 0., 0.]), rvec, tvec, length=3)
+        # return cv2.drawFrameAxes(im, self.__cameraMatrix, self.__distCoeffs, rvec, tvec, length=length)
+        return cv2.drawFrameAxes(im, K, np.array([0., 0., 0., 0., 0.]), rvec, tvec, length=length)
+
+    # VALIDÉ
+    def getBBoxPoints(self, points, frame, dimensions):
+        x = dimensions[0]
+        y = dimensions[1]
+        z = dimensions[2]
+
+        points = np.array([
+                    [ x/2,  y/2 , z/2],
+                    [ x/2,  y/2, -z/2],
+                    [ x/2, -y/2,  z/2],
+                    [ x/2, -y/2, -z/2],
+                    [-x/2,  y/2 , z/2],
+                    [-x/2,  y/2, -z/2],
+                    [-x/2, -y/2,  z/2],
+                    [-x/2, -y/2, -z/2]
+                ])
+
+        points = points @ frame[:3, :3].T + frame[:3, 3]
+
+        return points
+
+
+    def drawBBox(self, im, pts, frame, dimensions):
+
+        points = self.getBBoxPoints(pts, frame, dimensions)
+        for point in points:
+            f = np.eye(4)
+            f[:3, 3] = point
+            im = self.drawFrame(im, f, length=0.1)
+
+        return im
+
+        # TODO
+
+

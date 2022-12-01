@@ -287,9 +287,9 @@ def draw_bbox_3d(img,pts2d,color=(0,255,0)):
     img = cv2.line(img,tuple(pts2d[4]),tuple(pts2d[5]),color,2)
     img = cv2.line(img,tuple(pts2d[5]),tuple(pts2d[6]),color,2)
     img = cv2.line(img,tuple(pts2d[6]),tuple(pts2d[7]),color,2)
-    img = cv2.line(img,tuple(pts2d[7]),tuple(pts2d[4]),color,2)
+    img = cv2.line(img,tuple(pts2d[7]),tuple(pts2d[4]),front_color,2)
 
-    img = cv2.line(img,tuple(pts2d[0]),tuple(pts2d[4]),front_color,2)
+    img = cv2.line(img,tuple(pts2d[0]),tuple(pts2d[4]),color,2)
     img = cv2.line(img,tuple(pts2d[1]),tuple(pts2d[5]),color,2)
     img = cv2.line(img,tuple(pts2d[2]),tuple(pts2d[6]),color,2)
     img = cv2.line(img,tuple(pts2d[3]),tuple(pts2d[7]),color,2)
